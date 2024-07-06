@@ -1,6 +1,6 @@
-import 'package:bet_plus_web_app/pages/bet_booking_page.dart';
-import 'package:bet_plus_web_app/pages/login.dart';
-import 'package:bet_plus_web_app/pages/signup.dart';
+import 'package:bet_plus_web_app/views/bet_booking_page.dart';
+import 'package:bet_plus_web_app/views/login.dart';
+import 'package:bet_plus_web_app/views/signup.dart';
 import 'package:get/get.dart';
 
 class Routes {

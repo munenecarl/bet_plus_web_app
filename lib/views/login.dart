@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'signup.dart';
@@ -40,7 +41,9 @@ class LoginPage extends StatelessWidget {
               _buildTextField('Password', true),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.toNamed('/chat');
+                },
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all<Color>(
                       const Color(0xFF9C27B0)), // Purple color
