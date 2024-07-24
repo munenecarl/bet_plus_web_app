@@ -19,6 +19,48 @@ class _BetBookingPageState extends State<BetBookingPage> {
   final TextEditingController _drawOddsController = TextEditingController();
   DateTime? _selectedDate;
 
+  // void _submitData() async {
+  //   if (_selectedDate == null) return;
+
+  //   final String home = _homeController.text;
+  //   final String away = _awayController.text;
+  //   final String homeOdds = _homeOddsController.text;
+  //   final String awayOdds = _awayOddsController.text;
+  //   final String drawOdds = _drawOddsController.text;
+  //   final String gameDate = "${_selectedDate!.toLocal()}".split(' ')[0];
+
+  //   final Map<String, String> data = {
+  //     "home": home,
+  //     "away": away,
+  //     "home_odds": homeOdds,
+  //     "away_odds": awayOdds,
+  //     "draw_odds": drawOdds,
+  //     "game_date": gameDate
+  //   };
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse('http://127.0.0.1:8000/games/add-game/'),
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //       },
+  //       body: jsonEncode(data),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       print('Data submitted successfully');
+  //       // Handle successful submission
+  //     } else {
+  //       print('Failed to submit data');
+  //       print('Status Code: ${response.statusCode}');
+  //       print('Response: ${response.body}');
+  //       // Handle error
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //   }
+  // }
+
   void _submitData() async {
     if (_selectedDate == null) return;
 
@@ -41,23 +83,46 @@ class _BetBookingPageState extends State<BetBookingPage> {
     try {
       final response = await http.post(
         Uri.parse('http://127.0.0.1:8000/games/add-game/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(data),
       );
 
       if (response.statusCode == 200) {
-        print('Data submitted successfully');
-        // Handle successful submission
+        // Clear the text fields
+        _homeController.clear();
+        _awayController.clear();
+        _homeOddsController.clear();
+        _awayOddsController.clear();
+        _drawOddsController.clear();
+        _selectedDate = null; // Reset the selected date
+
+        // Display a flash message
+        Get.snackbar(
+          'Success', // Title
+          'Game data sent successfully!', // Message
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
       } else {
-        print('Failed to submit data');
-        print('Status Code: ${response.statusCode}');
-        print('Response: ${response.body}');
-        // Handle error
+        // Handle unsuccessful submission, e.g., display error message
+        Get.snackbar(
+          'Error', // Title
+          'Failed to send game data.', // Message
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
-      print('Error: $e');
+      // Handle exception, e.g., display error message
+      Get.snackbar(
+        'Error', // Title
+        'An error occurred while sending game data.', // Message
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -71,7 +136,7 @@ class _BetBookingPageState extends State<BetBookingPage> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              Get.toNamed('/update-outcomes');
+              Get.toNamed('/update-outcome');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFC107),

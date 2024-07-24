@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 class UpdateOutcomes extends StatefulWidget {
   @override
@@ -10,9 +11,11 @@ class UpdateOutcomes extends StatefulWidget {
 
 class _UpdateOutcomesState extends State<UpdateOutcomes> {
   late Future<List<Game>> _gamesFuture;
+  List<Game> _games = [];
   Game? _selectedGame;
   final TextEditingController _homeScoreController = TextEditingController();
   final TextEditingController _awayScoreController = TextEditingController();
+  late GameDataSource _gameDataSource;
 
   @override
   void initState() {
@@ -21,12 +24,15 @@ class _UpdateOutcomesState extends State<UpdateOutcomes> {
   }
 
   Future<List<Game>> _fetchGames() async {
-    final response = await http
-        .get(Uri.parse('http://127.0.0.1:8000/games/'));
-
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/games/'));
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Game.fromJson(json)).toList();
+      List<Game> games = data.map((json) => Game.fromJson(json)).toList();
+      setState(() {
+        _games = games;
+        _gameDataSource = GameDataSource(games: _games);
+      });
+      return games;
     } else {
       throw Exception('Failed to load games');
     }
@@ -54,12 +60,10 @@ class _UpdateOutcomesState extends State<UpdateOutcomes> {
 
       if (response.statusCode == 200) {
         print('Results submitted successfully');
-        // Handle successful submission
       } else {
         print('Failed to submit results');
         print('Status Code: ${response.statusCode}');
         print('Response: ${response.body}');
-        // Handle error
       }
     } catch (e) {
       print('Error: $e');
@@ -70,8 +74,7 @@ class _UpdateOutcomesState extends State<UpdateOutcomes> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text('Bet Outcomes Page', style: GoogleFonts.lobster(fontSize: 24)),
+        title: Text('Bet Outcomes Page', style: GoogleFonts.lobster(fontSize: 24)),
         backgroundColor: const Color(0xFF3A3A3A),
       ),
       body: Padding(
@@ -97,46 +100,109 @@ class _UpdateOutcomesState extends State<UpdateOutcomes> {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
-                    final games = snapshot.data!;
-
-                    return DataTable(
+                    return SfDataGrid(
+                      source: _gameDataSource,
                       columns: [
-                        DataColumn(
-                            label: Text('Match',
-                                style: TextStyle(color: Colors.white))),
-                        DataColumn(
-                            label: Text('Stadium',
-                                style: TextStyle(color: Colors.white))),
-                        DataColumn(
-                            label: Text('Date',
-                                style: TextStyle(color: Colors.white))),
-                        DataColumn(
-                            label: Text('Select',
-                                style: TextStyle(color: Colors.white))),
-                      ],
-                      rows: games.map((game) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text('${game.home} vs ${game.away}',
-                                style: TextStyle(color: Colors.white))),
-                            DataCell(Text(game.stadium,
-                                style: TextStyle(color: Colors.white))),
-                            DataCell(Text(game.date,
-                                style: TextStyle(color: Colors.white))),
-                            DataCell(
-                              Radio<Game>(
-                                value: game,
-                                groupValue: _selectedGame,
-                                onChanged: (Game? value) {
-                                  setState(() {
-                                    _selectedGame = value;
-                                  });
-                                },
-                              ),
+                        GridColumn(
+                          columnName: 'gameId',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'ID',
+                              style: TextStyle(color: Colors.white),
                             ),
-                          ],
-                        );
-                      }).toList(),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'home',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Home',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'away',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Away',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'homeOdds',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Home Odds',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'awayOdds',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Away Odds',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'drawOdds',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Draw Odds',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'gameDate',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Date',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'status',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Status',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'outcome',
+                          label: Container(
+                            padding: EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Outcome',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                   }
                 },
@@ -197,23 +263,145 @@ class _UpdateOutcomesState extends State<UpdateOutcomes> {
 }
 
 class Game {
+  final int gameId;
   final String home;
   final String away;
-  final String stadium;
-  final String date;
+  final double homeOdds;
+  final double awayOdds;
+  final double drawOdds;
+  final DateTime gameDate;
+  final bool status;
+  final String outcome;
 
-  Game(
-      {required this.home,
-      required this.away,
-      required this.stadium,
-      required this.date});
+  Game({
+    required this.gameId,
+    required this.home,
+    required this.away,
+    required this.homeOdds,
+    required this.awayOdds,
+    required this.drawOdds,
+    required this.gameDate,
+    required this.status,
+    required this.outcome,
+  });
 
   factory Game.fromJson(Map<String, dynamic> json) {
     return Game(
+      gameId: json['game_id'],
       home: json['home'],
       away: json['away'],
-      stadium: json['stadium'],
-      date: json['date'],
+      homeOdds: json['home_odds'],
+      awayOdds: json['away_odds'],
+      drawOdds: json['draw_odds'],
+      gameDate: DateTime.parse(json['game_date']),
+      status: json['status'],
+      outcome: json['outcome'],
     );
   }
 }
+
+class GameDataSource extends DataGridSource {
+  GameDataSource({required List<Game> games}) {
+    _games = games
+        .map<DataGridRow>((game) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'gameId', value: game.gameId),
+              DataGridCell<String>(columnName: 'home', value: game.home),
+              DataGridCell<String>(columnName: 'away', value: game.away),
+                            DataGridCell<double>(
+                  columnName: 'homeOdds', value: game.homeOdds),
+              DataGridCell<double>(
+                  columnName: 'awayOdds', value: game.awayOdds),
+              DataGridCell<double>(
+                  columnName: 'drawOdds', value: game.drawOdds),
+              DataGridCell<DateTime>(
+                  columnName: 'gameDate', value: game.gameDate),
+              DataGridCell<bool>(columnName: 'status', value: game.status),
+              DataGridCell<String>(columnName: 'outcome', value: game.outcome),
+            ]))
+        .toList();
+  }
+
+  List<DataGridRow> _games = [];
+
+  @override
+  List<DataGridRow> get rows => _games;
+
+  @override
+  DataGridRowAdapter buildRow(DataGridRow row) {
+    return DataGridRowAdapter(cells: [
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[0].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[1].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[2].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[3].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[4].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[5].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[6].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[7].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(8.0),
+        alignment: Alignment.center,
+        child: Text(
+          row.getCells()[8].value.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    ]);
+  }
+}
+
