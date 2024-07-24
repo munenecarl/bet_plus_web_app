@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 
 class BetBookingPage extends StatefulWidget {
   const BetBookingPage({super.key});
@@ -16,21 +19,7 @@ class _BetBookingPageState extends State<BetBookingPage> {
   final TextEditingController _drawOddsController = TextEditingController();
   DateTime? _selectedDate;
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  void _submitData() {
+  void _submitData() async {
     if (_selectedDate == null) return;
 
     final String home = _homeController.text;
@@ -49,12 +38,53 @@ class _BetBookingPageState extends State<BetBookingPage> {
       "game_date": gameDate
     };
 
-    print(data); // Replace with your HTTP POST request logic
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/games/add-game/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        print('Data submitted successfully');
+        // Handle successful submission
+      } else {
+        print('Failed to submit data');
+        print('Status Code: ${response.statusCode}');
+        print('Response: ${response.body}');
+        // Handle error
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title:
+            Text('Bet Booking Page', style: GoogleFonts.lobster(fontSize: 24)),
+        backgroundColor: const Color(0xFF3A3A3A),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Get.toNamed('/update-outcomes');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFC107),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: const Text('Update Games',
+                style: TextStyle(fontSize: 16, color: Colors.black)),
+          ),
+        ],
+      ),
       body: Center(
         child: Container(
           width: 600,
@@ -81,40 +111,85 @@ class _BetBookingPageState extends State<BetBookingPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildTextField(_homeController, 'Home Team'),
-              const SizedBox(height: 10),
-              _buildTextField(_awayController, 'Away Team'),
-              const SizedBox(height: 10),
-              _buildTextField(_homeOddsController, 'Home Odds'),
-              const SizedBox(height: 10),
-              _buildTextField(_awayOddsController, 'Away Odds'),
-              const SizedBox(height: 10),
-              _buildTextField(_drawOddsController, 'Draw Odds'),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white),
+              TextField(
+                controller: _homeController,
+                decoration: const InputDecoration(
+                  labelText: 'Home Team',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                  child: Text(
-                    _selectedDate == null
-                        ? 'Select Game Date'
-                        : "${_selectedDate!.toLocal()}".split(' ')[0],
-                    style: const TextStyle(color: Colors.white),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                 ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _awayController,
+                decoration: const InputDecoration(
+                  labelText: 'Away Team',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _homeOddsController,
+                decoration: const InputDecoration(
+                  labelText: 'Home Odds',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _awayOddsController,
+                decoration: const InputDecoration(
+                  labelText: 'Away Odds',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _drawOddsController,
+                decoration: const InputDecoration(
+                  labelText: 'Draw Odds',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitData,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF9C27B0), // Purple color
+                  backgroundColor: const Color(0xFFFFC107),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
@@ -123,30 +198,39 @@ class _BetBookingPageState extends State<BetBookingPage> {
                 ),
                 child: const Text(
                   'Submit',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  final DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if (pickedDate != null && pickedDate != _selectedDate) {
+                    setState(() {
+                      _selectedDate = pickedDate;
+                    });
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFC107),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  'Pick Date',
+                  style: TextStyle(fontSize: 16, color: Colors.black),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String label) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.white),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFFFFC107)),
-          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );
